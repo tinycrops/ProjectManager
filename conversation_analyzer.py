@@ -31,19 +31,30 @@ def setup_gemini_model():
     return model.start_chat(history=[])
 
 def analyze_conversation(chat_session, conversation_summary):
-    """Send conversation summary to Gemini and get analysis."""
-    prompt = f"""Please analyze this Discord conversation summary and provide key insights:
+    """Interactive conversation analysis with Gemini."""
+    # Initial context setting
+    context_prompt = f"""Here's a Discord conversation summary to analyze. I'll be asking questions about it:
 
 {conversation_summary}
 
-Please include:
-1. Main discussion topics
-2. Key participants
-3. Notable patterns or trends
-4. Important decisions or conclusions (if any)"""
+Please keep your responses focused on the content of this conversation."""
 
-    response = chat_session.send_message(prompt)
-    return response.text
+    chat_session.send_message(context_prompt)
+    
+    print("\nConversation loaded! You can now ask questions about it.")
+    print("Type 'quit' or 'exit' to end the session.\n")
+
+    while True:
+        question = input("\nWhat would you like to know about the conversation? > ")
+        
+        if question.lower() in ['quit', 'exit']:
+            break
+            
+        try:
+            response = chat_session.send_message(question)
+            print("\nAnalysis:", response.text)
+        except Exception as e:
+            print(f"\nError getting response: {e}")
 
 def main():
     parser = argparse.ArgumentParser(description='Export Discord chat and analyze with Gemini')
@@ -102,26 +113,12 @@ def main():
     print("Initializing Gemini model...")
     chat_session = setup_gemini_model()
     
-    print("Analyzing conversation with Gemini...")
+    print("Starting interactive analysis...")
     try:
-        analysis = analyze_conversation(chat_session, summary)
-        print("Analysis complete!")
+        analyze_conversation(chat_session, summary)
     except Exception as e:
-        print(f"Error during Gemini analysis: {e}")
+        print(f"Error during interactive session: {e}")
         return
-
-    # Save results
-    print("Saving analysis results...")
-    try:
-        with open(args.output, "w", encoding="utf-8") as f:
-            f.write("# Discord Conversation Analysis\n\n")
-            f.write("## Raw Conversation Summary\n\n")
-            f.write(summary)
-            f.write("\n\n## AI Analysis\n\n")
-            f.write(analysis)
-        print(f"Analysis successfully written to {args.output}")
-    except IOError as e:
-        print(f"Error writing to output file: {e}")
 
     # Add final delay to ensure Gemini completes
     time.sleep(2)
