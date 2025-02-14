@@ -25,7 +25,13 @@ def setup_gemini_model():
     model = genai.GenerativeModel(
         model_name="gemini-2.0-flash",
         generation_config=generation_config,
-        system_instruction="You are an AI assistant that analyzes Discord conversation data. Provide insights, summaries, and answer questions about the conversations."
+        system_instruction="You are an AI assistant that analyzes Discord conversation data. Provide insights, summaries, and answer questions about the conversations.",
+          tools = [
+            genai.protos.Tool(
+                function_declarations = [
+                ],
+            ),
+        ],
     )
 
     return model.start_chat(history=[])
