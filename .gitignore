@@ -1,2 +1,4 @@
-team_chat/
+__pycache__/
 .env
+team_chat/
+.venv
