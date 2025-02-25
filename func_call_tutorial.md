@@ -55,7 +55,7 @@ Before calling the Gemini API, you need to set up your project and configure you
 
 Define an API function
 Create a function that makes an API request. This function should be defined within the code of your application, but could call services or APIs outside of your application. The Gemini API does not call this function directly, so you can control how and when this function is executed through your application code. For demonstration purposes, this tutorial defines a mock API function that just returns the requested lighting values:
-
+```
 
 def set_light_values(brightness: int, color_temp: str) -> dict[str, int | str]:
     """Set the brightness and color temperature of a room light. (mock API).
@@ -71,13 +71,15 @@ def set_light_values(brightness: int, color_temp: str) -> dict[str, int | str]:
         "brightness": brightness,
         "colorTemperature": color_temp
     }
+```
+
 When you create a function to be used in a function call by the model, you should include as much detail as possible in the function and parameter descriptions. The generative model uses this information to determine which function to select and how to provide values for the parameters in the function call.
 
 Caution: For any production application, you should validate the data being passed to the API function from the model before executing the function.
 Note: For programming languages other than Python, you must create a separate function declaration for your API. See the other language programming tutorials for more details.
 Declare functions during model initialization
 When you want to use function calling, you define the functions as tools in the GenerateContentConfig, along with other generation-related settings (such as temperature or stop tokens).
-
+```
 
 from google.genai import types
 
@@ -88,10 +90,12 @@ This can be also be defined as a Python dictionary.
 config = {
     'tools': [set_light_values],
 }
+```
+
 Generate a function call
 Once you have defined your function declarations, you can prompt the model to use the function. You can generate content directly, or using the chat interface.
 
-
+```
 from google import genai
 
 client = genai.Client()
@@ -108,9 +112,10 @@ print(response.text)
 chat = client.chats.create(model='gemini-2.0-flash', config=config)
 response = chat.send_message('Turn the lights down to a romantic level')
 print(response.text)
+```
 In the Python SDK, functions are called automatically. If you want to handle each function call, or perform some other logic between calls, you can disable it through the flag in the generation config.
 
-
+```
 from google.genai import types
 
 # Use strong types.
@@ -188,12 +193,14 @@ for fn in response.function_calls:
 power_disco_ball(power=True)
 start_music(energetic=True, loud=True)
 dim_lights(brightness=0.3)
+```
+
 Each of the printed results reflects a single function call that the model has requested. To send the results back, include the responses in the same order as they were requested.
 
 The simplest way to do this is by leaving automatic_function_calling enabled, so that the SDK will handle the function calls and response passing automatically.
 
 Note: When using automatic_function_calling with multiple functions, if any of them fail, the SDK will pass the error back to the model where it may be invoked again. This is helpful, for example, if the model has generated an incorrect argument set that can be correct, but may be problematic if your function produces side-effects before an error is raised.
-
+```
 config = {
     'tools': house_fns,
 }
@@ -203,7 +210,7 @@ chat = client.chats.create(model='gemini-2.0-flash', config=config)
 response = chat.send_message('Do everything you need to this place into party!')
 
 print(response.text)
-
+```
 Disco ball is spinning!
 Starting music! energetic=True loud=True
 Lights are now set to 50%
@@ -216,7 +223,7 @@ AllowedType = (int | float | bool | str | list['AllowedType'] | dict[str, Allowe
 Important: The SDK converts function parameter type annotations to a format the API understands (genai.types.FunctionDeclaration). The API only supports a limited selection of parameter types, and the Python SDK's automatic conversion only supports a subset of that: AllowedTypes = int | float | bool | str | list['AllowedTypes'] | dict
 To see what the inferred schema looks like, you can convert it using from_callable:
 
-
+```
 from pprint import pprint
 
 def multiply(a: float, b: float):
@@ -239,9 +246,10 @@ These JSON fields map to the equivalent fields on the Pydantic schema, and can b
 config = types.GenerateContentConfig(
     tools=[types.Tool(function_declarations=[fn_decl])]
 )
+```
 Here is a declaration for the same multiply function written using the genai.types classes. Note that these classes just describe the function for the API, they don't include an implementation of it, so this approach doesn't work with automatic function calling. However, it does allow you to define functions that aren't concrete Python functions (for example, to wrap a remote HTTP call), and gives you more control between function calls (for example, to change function_calling_config to follow a state graph).
 
-
+```
 tool = types.Tool(function_declarations=[
     types.FunctionDeclaration(
         name="multiply",
@@ -256,15 +264,4 @@ tool = types.Tool(function_declarations=[
     )
 ])
 assert tool.function_declarations[0] == fn_decl
-Was this helpful?
-
-Send feedback
-Except as otherwise noted, the content of this page is licensed under the Creative Commons Attribution 4.0 License, and code samples are licensed under the Apache 2.0 License. For details, see the Google Developers Site Policies. Java is a registered trademark of Oracle and/or its affiliates.
-
-Last updated 2025-02-12 UTC.
-
-Terms
-Privacy
-
-English
-The new page has loaded..
+```
