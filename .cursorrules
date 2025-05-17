@@ -1,0 +1,3 @@
+We are using google-genai (from google.genai import *) NOT google-generativeai.
+Use Client class from google.genai with gemini-2.0-flash model.
+Import syntax: from google import genai

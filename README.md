@@ -29,6 +29,8 @@ A user-friendly GUI for exporting and analyzing Discord conversations, built wit
    pip install -r requirements.txt
    ```
 
+   This will install the required packages including `google-genai`, the official Python SDK for the Gemini API.
+
 3. Verify Docker is installed and running:
    ```
    docker --version
@@ -71,7 +73,7 @@ Your Discord Token and Gemini API key are stored locally in a `.env` file. Be ca
 ## Credits
 
 - [DiscordChatExporter](https://github.com/Tyrrrz/DiscordChatExporter) by Tyrrrz
-- Google Gemini AI for conversation analysis
+- Google Gemini API (using gemini-2.0-flash model) for conversation analysis
 - Streamlit for the user interface
 
 ## License

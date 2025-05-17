@@ -5,7 +5,7 @@ import time
 import subprocess
 from datetime import datetime
 from dotenv import load_dotenv
-import google.generativeai as genai
+from google import genai
 
 # Import functions from existing scripts
 from discord_export import (
@@ -35,24 +35,10 @@ def setup_gemini_model():
     if not api_key:
         st.error("Gemini API key not found. Please provide it in the settings.")
         return None
-    
-    genai.configure(api_key=api_key)
 
-    generation_config = {
-        "temperature": 0.7,
-        "top_p": 0.95,
-        "top_k": 40,
-        "max_output_tokens": 8192,
-        "response_mime_type": "text/plain",
-    }
-
-    model = genai.GenerativeModel(
-        model_name="gemini-2.0-flash",
-        generation_config=generation_config,
-        system_instruction="You are an AI assistant that analyzes Discord conversation data. Provide insights, summaries, and answer questions about the conversations.",
-    )
-
-    return model.start_chat(history=[])
+    client = genai.Client(api_key=api_key)
+    chat = client.chats.create(model="gemini-2.0-flash")
+    return chat
 
 # Sidebar for settings
 with st.sidebar:

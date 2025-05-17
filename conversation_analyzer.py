@@ -4,7 +4,7 @@ import os
 import subprocess
 import argparse
 from dotenv import load_dotenv
-import google.generativeai as genai
+from google import genai
 
 # Import the export functions from discord-export.py
 from discord_export import (
@@ -15,29 +15,25 @@ from discord_export import (
 def setup_gemini_model():
     """Configure and return Gemini model instance."""
     load_dotenv()
-    genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
-
-    generation_config = {
-        "temperature": 1,
-        "top_p": 0.95,
-        "top_k": 40,
-        "max_output_tokens": 8192,
-        "response_mime_type": "text/plain",
-    }
-
-    model = genai.GenerativeModel(
-        model_name="gemini-2.0-flash",
-        generation_config=generation_config,
-        system_instruction="You are an AI assistant that analyzes Discord conversation data. Provide insights, summaries, and answer questions about the conversations.",
-        #   tools = [
-        #     genai.protos.Tool(
-        #         function_declarations = [
-        #         ],
-        #     ),
-        # ],
+    api_key = os.getenv("GEMINI_API_KEY")
+    if not api_key:
+        raise ValueError("GEMINI_API_KEY not found in environment variables")
+    
+    client = genai.Client(api_key=api_key)
+    
+    # Create a chat with the model
+    chat = client.chats.create(
+        model="gemini-2.0-flash",
+        config=genai.types.GenerateContentConfig(
+            system_instruction="You are an AI assistant that analyzes Discord conversation data. Provide insights, summaries, and answer questions about the conversations.",
+            max_output_tokens=8192,
+            temperature=1,
+            top_p=0.95,
+            top_k=40
+        )
     )
-
-    return model.start_chat(history=[])
+    
+    return chat
 
 def analyze_conversation(chat_session, conversation_summary):
     """Interactive conversation analysis with Gemini."""
@@ -48,7 +44,7 @@ def analyze_conversation(chat_session, conversation_summary):
 
 Please keep your responses focused on the content of this conversation."""
 
-    chat_session.send_message(context_prompt)
+    response = chat_session.send_message(context_prompt)
     
     print("\nConversation loaded! You can now ask questions about it.")
     print("Type 'quit' or 'exit' to end the session.\n")
